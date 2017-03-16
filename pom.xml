@@ -60,7 +60,7 @@
             </plugin>
 
             <!-- enable processors -->
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.bsc.maven</groupId>
                 <artifactId>maven-processor-plugin</artifactId>
                 <version>1.3.7</version>
@@ -78,7 +78,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
         </plugins>
 
         <resources>

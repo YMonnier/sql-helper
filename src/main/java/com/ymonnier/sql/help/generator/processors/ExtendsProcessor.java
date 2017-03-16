@@ -55,18 +55,6 @@ public class ExtendsProcessor extends AbstractProcessor {
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field3: " + el.asType());
                     processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field4: " + el.asType());
                 }
-                /*
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field: " + el.toString());
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "        isAnnotedWithAttr: " + el.getClass().isAnnotationPresent(Attr.class));
-                el.getAnnotationMirrors().forEach(ann -> processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "      ann: " + ann.getClass().getName()));
-                for (Attr attr : el.getAnnotationsByType(Attr.class)) {
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "      attr: " + attr.annotationType().getCanonicalName());
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "      attr: " + Attr.class.getCanonicalName());
-                }
-                el.getModifiers().forEach(ann -> processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "      modifier: " + ann.toString()));
-                el.getModifiers().forEach(modifier -> processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "      mod: " + modifier.toString()));
-                el.getEnclosedElements().forEach(o -> processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "      oel: " + o.toString()));
-                */
             }
         });
 
@@ -78,11 +66,6 @@ public class ExtendsProcessor extends AbstractProcessor {
         String typeName = sourceClass.getSimpleName().toString();//.replace(".", "_") + "Manager";
         String fileName = "_" + typeName;
 
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "generate...");
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, fqn);
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, packageName);
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, typeName);
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "pp: " + packageName + "." + fileName + ".java");
 
         try {
             JavaFileObject file = processingEnv.getFiler().createSourceFile(packageName + "." + fileName, sourceClass);
@@ -92,7 +75,16 @@ public class ExtendsProcessor extends AbstractProcessor {
 
             pw.println("package " + packageName + ";");
             pw.println("");
+            pw.println("import com.ymonnier.sql.help.service.CrudService;");
+            pw.println("import com.ymonnier.sql.help.service.CrudServiceBean;");
+            pw.println("import com.ymonnier.sql.help.service.QueryBuilder;");
+            pw.println("import java.util.List;");
+            pw.println("import java.util.Map;");
+
+            pw.println("");
             pw.println("public class " + fileName + " {");
+            pw.println("    ");
+            pw.println("    CrudServiceBean<" + typeName + "> service = new CrudServiceBean<" + typeName + ">();");
             sourceClass.getEnclosedElements().forEach(attr -> {
                 if (attr.getKind().isField()) {
                     if (attr.getAnnotationsByType(Attr.class).length > 0) {
@@ -103,6 +95,57 @@ public class ExtendsProcessor extends AbstractProcessor {
                     }
                 }
             });
+
+            pw.println("    @Override");
+            pw.println("    public static MyEntity save(" + typeName + " object) {");
+            pw.println("        return service.save(object);");
+            pw.println("    }");
+            pw.println("    ");
+
+            pw.println("    @Override");
+            pw.println("    public static MyEntity update(" + typeName + " object) {");
+            pw.println("        return service.update(object);");
+            pw.println("    }");
+            pw.println("    ");
+
+            pw.println("    @Override");
+            pw.println("    public static MyEntity delete(" + typeName + " object) {");
+            pw.println("        return service.delete(object);");
+            pw.println("    }");
+            pw.println("    ");
+
+            pw.println("    @Override");
+            pw.println("    public static List findWithNamedQuery(String queryName) {");
+            pw.println("        return service.findWithNamedQuery(queryName);");
+            pw.println("    }");
+            pw.println("    ");
+
+            pw.println("    @Override");
+            pw.println("    public static List findWithNamedQuery(String queryName, int limit) {");
+            pw.println("        return service.findWithNamedQuery(queryName)");
+            pw.println("                       .setMaxResults(limit)");
+            pw.println("                       .getResultList();");
+            pw.println("    }");
+            pw.println("    ");
+
+            pw.println("    @Override");
+            pw.println("    public static List findWithNamedQuery(String queryName, Map parameters) {");
+            pw.println("        return service.findWithNamedQuery(queryName, parameters, 0);");
+            pw.println("    }");
+            pw.println("    ");
+
+            pw.println("    @Override");
+            pw.println("    public static List findWithNamedQuery(String namedQueryName, Map parameters, int resultLimit) {");
+            pw.println("        return service.findWithNamedQuery(namedQueryName, parameters, resultLimit);");
+            pw.println("    }");
+            pw.println("    ");
+
+            pw.println("    @Override");
+            pw.println("    public static void close() {");
+            pw.println("        return service.close();");
+            pw.println("    }");
+            pw.println("    ");
+
             pw.println("}");
             pw.close();
             writer.close();

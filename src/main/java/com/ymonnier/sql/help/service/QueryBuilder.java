@@ -14,14 +14,30 @@ import java.util.Map;
  * www.yseemonnier.com
  * https://github.com/YMonnier
  */
-public class QueryBuilder {
+public class QueryBuilder<T> {
     private Map<String, Object> parameters;
     private String source;
     private final EntityManager entityManager;
+    private Class type;
     public QueryBuilder(EntityManager entityManager, Class type, String name, Object value) {
         this.parameters = new HashMap<>();
         this.entityManager = entityManager;
         this.parameters.put(name, value);
+        this.type = type;
         this.source = ClassUtil.getTableName(entityManager, type);
+    }
+
+    public QueryBuilder where(String name, Object value) {
+        this.parameters.put(name, value);
+        return this;
+    }
+
+    public QueryBuilder and(String name, Object value) {
+        this.parameters.put(name, value);
+        return this;
+    }
+
+    public T get() {
+        return null;
     }
 }

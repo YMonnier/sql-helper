@@ -14,6 +14,6 @@ import java.lang.annotation.Target;
  * https://github.com/YMonnier
  */
 @Target(value = ElementType.TYPE)
-@Retention(value = RetentionPolicy.CLASS)
+@Retention(value = RetentionPolicy.RUNTIME)
 public @interface Extends {
 }
