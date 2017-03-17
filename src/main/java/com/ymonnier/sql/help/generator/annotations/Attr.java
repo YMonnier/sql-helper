@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
  * https://github.com/YMonnier
  */
 @Target(value = ElementType.FIELD)
-@Retention(value = RetentionPolicy.RUNTIME)
+@Retention(value = RetentionPolicy.SOURCE)
 public @interface Attr {
 }

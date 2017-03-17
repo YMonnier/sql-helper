@@ -18,7 +18,7 @@ import java.util.Set;
  */
 public class CrudServiceBean<T> implements CrudService<T> {
 
-    private EntityManager entityManager;
+    public EntityManager entityManager;
 
     public CrudServiceBean() {
         this.entityManager = EntityManagerFactory.get();

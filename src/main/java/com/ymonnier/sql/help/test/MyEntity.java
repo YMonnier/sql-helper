@@ -3,6 +3,9 @@ package com.ymonnier.sql.help.test;
 import com.ymonnier.sql.help.generator.annotations.Attr;
 import com.ymonnier.sql.help.generator.annotations.Extends;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
 /**
  * Project SqlHelper.
  * Package com.ymonnier.sql.help.test.
@@ -12,7 +15,9 @@ import com.ymonnier.sql.help.generator.annotations.Extends;
  * https://github.com/YMonnier
  */
 @Extends
+@Entity
 public class MyEntity {
+    @Id
     @Attr
     Long id;
     @Attr

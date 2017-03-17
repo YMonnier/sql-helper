@@ -10,8 +10,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import javax.persistence.EntityManager;
 import javax.persistence.Persistence;
 import java.io.FileReader;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -32,16 +30,16 @@ public class EntityManagerFactory {
     private static String persistanceName = "";
 
 
-    private static final String PERSISTANCE_FILE_NAME = "persistence.xml";
-    private static final String PERSISTANCE_ELEM = "persistence-unit";
+    private static final String PERSISTENCE_FILE_NAME = "META-INF/persistence.xml";
+    private static final String PERSISTENCE_ELEM = "persistence-unit";
     private static final String NAME_ATTR = "name";
 
     static {
         class PersistenceReader extends DefaultHandler {
             @Override
             public void startElement(String s, String s1, String s2, Attributes attributes) throws SAXException {
-                if (s2.equals(PERSISTANCE_ELEM))
-                    persistanceName = attributes.getType(NAME_ATTR);
+                if (s2.equals(PERSISTENCE_ELEM))
+                    persistanceName = attributes.getValue(NAME_ATTR);
             }
         }
 
@@ -54,7 +52,7 @@ public class EntityManagerFactory {
 
             ClassLoader classloader = Thread.currentThread().getContextClassLoader();
             FileReader r = new FileReader(classloader
-                    .getResource(PERSISTANCE_FILE_NAME)
+                    .getResource(PERSISTENCE_FILE_NAME)
                     .getPath());
             xr.parse(new InputSource(r));
             managerFactory = Persistence.createEntityManagerFactory(persistanceName);

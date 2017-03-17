@@ -126,3 +126,4 @@ buildNumber.properties
 *.sql
 *.*~
 *.xml
+generated/

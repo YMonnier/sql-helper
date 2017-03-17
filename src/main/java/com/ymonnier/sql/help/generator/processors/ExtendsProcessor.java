@@ -78,13 +78,14 @@ public class ExtendsProcessor extends AbstractProcessor {
             pw.println("import com.ymonnier.sql.help.service.CrudService;");
             pw.println("import com.ymonnier.sql.help.service.CrudServiceBean;");
             pw.println("import com.ymonnier.sql.help.service.QueryBuilder;");
+            pw.println("import javax.persistence.EntityManager;");
             pw.println("import java.util.List;");
             pw.println("import java.util.Map;");
 
             pw.println("");
             pw.println("public class " + fileName + " {");
             pw.println("    ");
-            pw.println("    CrudServiceBean<" + typeName + "> service = new CrudServiceBean<" + typeName + ">();");
+            pw.println("    private final static CrudServiceBean<" + typeName + "> service = new CrudServiceBean<" + typeName + ">();");
             sourceClass.getEnclosedElements().forEach(attr -> {
                 if (attr.getKind().isField()) {
                     if (attr.getAnnotationsByType(Attr.class).length > 0) {
@@ -96,53 +97,56 @@ public class ExtendsProcessor extends AbstractProcessor {
                 }
             });
 
-            pw.println("    @Override");
+            pw.println("    public static EntityManager getEntityManager() {");
+            pw.println("        return service.entityManager;");
+            pw.println("    }");
+            pw.println("    ");
+
+            //pw.println("    @Override");
             pw.println("    public static MyEntity save(" + typeName + " object) {");
             pw.println("        return service.save(object);");
             pw.println("    }");
             pw.println("    ");
 
-            pw.println("    @Override");
+            //pw.println("    @Override");
             pw.println("    public static MyEntity update(" + typeName + " object) {");
             pw.println("        return service.update(object);");
             pw.println("    }");
             pw.println("    ");
 
-            pw.println("    @Override");
-            pw.println("    public static MyEntity delete(" + typeName + " object) {");
-            pw.println("        return service.delete(object);");
+            //pw.println("    @Override");
+            pw.println("    public static void delete(" + typeName + " object) {");
+            pw.println("        service.delete(object);");
             pw.println("    }");
             pw.println("    ");
 
-            pw.println("    @Override");
+            //pw.println("    @Override");
             pw.println("    public static List findWithNamedQuery(String queryName) {");
             pw.println("        return service.findWithNamedQuery(queryName);");
             pw.println("    }");
             pw.println("    ");
 
-            pw.println("    @Override");
+            //pw.println("    @Override");
             pw.println("    public static List findWithNamedQuery(String queryName, int limit) {");
-            pw.println("        return service.findWithNamedQuery(queryName)");
-            pw.println("                       .setMaxResults(limit)");
-            pw.println("                       .getResultList();");
+            pw.println("        return service.findWithNamedQuery(queryName, limit);");
             pw.println("    }");
             pw.println("    ");
 
-            pw.println("    @Override");
+            //pw.println("    @Override");
             pw.println("    public static List findWithNamedQuery(String queryName, Map parameters) {");
             pw.println("        return service.findWithNamedQuery(queryName, parameters, 0);");
             pw.println("    }");
             pw.println("    ");
 
-            pw.println("    @Override");
+            //pw.println("    @Override");
             pw.println("    public static List findWithNamedQuery(String namedQueryName, Map parameters, int resultLimit) {");
             pw.println("        return service.findWithNamedQuery(namedQueryName, parameters, resultLimit);");
             pw.println("    }");
             pw.println("    ");
 
-            pw.println("    @Override");
+            //pw.println("    @Override");
             pw.println("    public static void close() {");
-            pw.println("        return service.close();");
+            pw.println("        service.close();");
             pw.println("    }");
             pw.println("    ");
 
