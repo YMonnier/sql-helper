@@ -27,19 +27,20 @@ public class EntityManagerFactory {
 
     private static final int numberOfInitialConnections = 6;
 
-    private static String persistanceName = "";
+    private static String persistenceName = "";
 
 
     private static final String PERSISTENCE_FILE_NAME = "META-INF/persistence.xml";
     private static final String PERSISTENCE_ELEM = "persistence-unit";
     private static final String NAME_ATTR = "name";
 
+/*
     static {
         class PersistenceReader extends DefaultHandler {
             @Override
             public void startElement(String s, String s1, String s2, Attributes attributes) throws SAXException {
                 if (s2.equals(PERSISTENCE_ELEM))
-                    persistanceName = attributes.getValue(NAME_ATTR);
+                    persistenceName = attributes.getValue(NAME_ATTR);
             }
         }
 
@@ -55,7 +56,7 @@ public class EntityManagerFactory {
                     .getResource(PERSISTENCE_FILE_NAME)
                     .getPath());
             xr.parse(new InputSource(r));
-            managerFactory = Persistence.createEntityManagerFactory(persistanceName);
+            managerFactory = Persistence.createEntityManagerFactory(persistenceName);
             for (int i = 0; i < numberOfInitialConnections; i++) {
                 entityManagers.add(managerFactory.createEntityManager());
             }
@@ -63,6 +64,13 @@ public class EntityManagerFactory {
             e.printStackTrace();
         }
 
+    }
+*/
+    public static void init(String persistenceName) {
+        managerFactory = Persistence.createEntityManagerFactory(persistenceName);
+        for (int i = 0; i < numberOfInitialConnections; i++) {
+            entityManagers.add(managerFactory.createEntityManager());
+        }
     }
 
     public static synchronized EntityManager get() {

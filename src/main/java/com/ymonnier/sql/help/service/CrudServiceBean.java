@@ -24,6 +24,10 @@ public class CrudServiceBean<T> implements CrudService<T> {
         this.entityManager = EntityManagerFactory.get();
     }
 
+    public CrudServiceBean(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
     @Override
     public T save(T object) {
         entityManager.persist(object);
