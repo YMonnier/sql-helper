@@ -28,6 +28,12 @@ public class CrudServiceBean<T> implements CrudService<T> {
         this.entityManager = entityManager;
     }
 
+    /**
+     * Save an entity into the database.
+     *
+     * @param object Entity object.
+     * @return The entity updated(@ID).
+     */
     @Override
     public T save(T object) {
         entityManager.persist(object);
@@ -36,47 +42,51 @@ public class CrudServiceBean<T> implements CrudService<T> {
         return object;
     }
 
+    /**
+     * Update an entity into the database.
+     *
+     * @param object Entity object.
+     * @return The entity updated.
+     */
     @Override
     public T update(T object) {
         return entityManager.merge(object);
     }
 
+    /**
+     * Delete an entity into the database.
+     *
+     * @param object Entity object.
+     */
     @Override
     public void delete(T object) {
         entityManager.remove(object);
     }
 
-    @Override
-    public List findWithNamedQuery(String queryName) {
-        return entityManager.createNamedQuery(queryName).getResultList();
-    }
-
-    @Override
-    public List findWithNamedQuery(String queryName, int limit) {
-        return entityManager.createNamedQuery(queryName)
-                .setMaxResults(limit)
-                .getResultList();
-    }
-
-    @Override
-    public List findWithNamedQuery(String queryName, Map parameters) {
-        return findWithNamedQuery(queryName, parameters, 0);
-    }
-
-    @Override
-    public List findWithNamedQuery(String namedQueryName, Map parameters, int resultLimit) {
-        Set<Map.Entry> rawParameters = parameters.entrySet();
-
+    /**
+     * Create a QueryBuilder for a named query.
+     *
+     * @param namedQueryName The string query name.
+     * @return QueryBuilder object. @see QueryBuilder
+     */
+    public QueryBuilder<T> findWithNamedQuery(String namedQueryName) {
         Query query = entityManager.createNamedQuery(namedQueryName);
-        if (resultLimit > 0)
-            query.setMaxResults(resultLimit);
-        for (Map.Entry entry : rawParameters) {
-
-            query.setParameter((Integer) entry.getKey(), entry.getValue());
-        }
-        return query.getResultList();
+        return new QueryBuilder<>(query);
     }
 
+    /**
+     * Create a QueryBuilder for a specific query.
+     *
+     * @param query The string query (native SQL or JPQL).
+     * @return QueryBuilder object. @see QueryBuilder
+     */
+    public QueryBuilder<T> findWithQuery(String query) {
+        return new QueryBuilder<>(entityManager.createQuery(query));
+    }
+
+    /**
+     * Close the EntityManager connection.
+     */
     @Override
     public void close() {
         EntityManagerFactory.release(entityManager);

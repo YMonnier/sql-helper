@@ -1,10 +1,11 @@
 package com.ymonnier.sql.help.service;
 
-import com.ymonnier.sql.help.service.utilities.ClassUtil;
 
-import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Project SqlHelper.
@@ -15,29 +16,94 @@ import java.util.Map;
  * https://github.com/YMonnier
  */
 public class QueryBuilder<T> {
+    /**
+     * Parameters query.
+     */
     private Map<String, Object> parameters;
-    private String source;
-    private final EntityManager entityManager;
-    private Class type;
-    public QueryBuilder(EntityManager entityManager, Class type, String name, Object value) {
+
+    /**
+     * limitation of tuple number
+     */
+    private int limit;
+
+    /**
+     * Current query created
+     * by the user (native sql, jpql, ...).
+     */
+    private Query query;
+
+    public QueryBuilder(Query query) {
         this.parameters = new HashMap<>();
-        this.entityManager = entityManager;
-        this.parameters.put(name, value);
-        this.type = type;
-        this.source = ClassUtil.getTableName(entityManager, type);
+        this.limit = 0;
+        this.query = query;
     }
 
-    public QueryBuilder where(String name, Object value) {
+    /**
+     * Set a parameter to the current query.
+     *
+     * @param name  key value parameter
+     * @param value value parameter
+     * @return `QueryBuilder` object
+     */
+    public QueryBuilder<T> where(String name, Object value) {
         this.parameters.put(name, value);
         return this;
     }
 
-    public QueryBuilder and(String name, Object value) {
+    /**
+     * Set a parameter to the current query.
+     *
+     * @param name  key value parameter
+     * @param value value parameter
+     * @return `QueryBuilder` object
+     */
+    public QueryBuilder<T> and(String name, Object value) {
         this.parameters.put(name, value);
         return this;
     }
 
-    public T get() {
-        return null;
+    /**
+     * Set the limitation of tuple number
+     *
+     * @param limit max tuple number
+     * @return `QueryBuilder` object
+     */
+    public QueryBuilder<T> limit(int limit) {
+        this.limit = limit;
+        return this;
+    }
+
+    /**
+     * Return a list of generic object.
+     *
+     * @return list of generic object.
+     */
+    public List list() {
+        apply();
+        return query.getResultList();
+    }
+
+    /**
+     * Return a single object.
+     *
+     * @return Single generic object.
+     */
+    public T first() {
+        apply();
+        return (T) query.getSingleResult();
+    }
+
+    /**
+     * Apply all query settings
+     * like the limitation of tuple number
+     * and parameters
+     */
+    private void apply() {
+        Set<Map.Entry<String, Object>> rawParameters = parameters.entrySet();
+        if (limit > 0)
+            query.setMaxResults(limit);
+        for (Map.Entry<String, Object> entry : rawParameters) {
+            query.setParameter(entry.getKey(), entry.getValue());
+        }
     }
 }

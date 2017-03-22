@@ -3,11 +3,13 @@ package com.ymonnier.sql.help.generator.processors;
 
 import com.ymonnier.sql.help.generator.annotations.Attr;
 import com.ymonnier.sql.help.generator.annotations.Extends;
+import com.ymonnier.sql.help.service.QueryBuilder;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.persistence.Query;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -29,11 +31,10 @@ public class ExtendsProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (Element element : roundEnv.getElementsAnnotatedWith(Extends.class)) {
-            if (element.getKind().isClass())
-                generate(element);
-
-        }
+        roundEnv.getElementsAnnotatedWith(Extends.class)
+                .stream()
+                .filter(element -> element.getKind().isClass())
+                .forEach(this::generate);
         return true;
     }
 
@@ -56,27 +57,26 @@ public class ExtendsProcessor extends AbstractProcessor {
             pw.println("import com.ymonnier.sql.help.service.CrudServiceBean;");
             pw.println("import com.ymonnier.sql.help.service.QueryBuilder;");
             pw.println("import javax.persistence.EntityManager;");
+            pw.println("import javax.persistence.Query;");
             pw.println("import java.util.List;");
             pw.println("import java.util.Map;");
+
 
             pw.println("");
             pw.println("public class " + fileName + " {");
             pw.println("    ");
-            pw.println("    private final CrudServiceBean<" + typeName + "> service = new CrudServiceBean<" + typeName + ">();");
+            pw.println("    private final CrudServiceBean<" + typeName + "> service;");
             pw.println("    ");
             pw.println("    public " + fileName + "() {");
+            pw.println("        service = new CrudServiceBean<" + typeName + ">();");
             pw.println("    }");
             pw.println("    ");
-            sourceClass.getEnclosedElements().forEach(attr -> {
-                if (attr.getKind().isField()) {
-                    if (attr.getAnnotationsByType(Attr.class).length > 0) {
-                        pw.println("    public " + typeName + " findBy" + firstUpperCaseLetter(attr.toString()) + "(" + attr.asType() + " " + attr + ") {");
-                        pw.println("        return null;");
-                        pw.println("    }");
-                        pw.println("    ");
-                    }
-                }
-            });
+
+            pw.println("    public " + fileName + "(EntityManager em) {");
+            pw.println("        service = new CrudServiceBean<" + typeName + ">(em);");
+            pw.println("    }");
+            pw.println("    ");
+
 
             pw.println("    public EntityManager getEntityManager() {");
             pw.println("        return service.entityManager;");
@@ -84,13 +84,13 @@ public class ExtendsProcessor extends AbstractProcessor {
             pw.println("    ");
 
             //pw.println("    @Override");
-            pw.println("    public MyEntity save(" + typeName + " object) {");
+            pw.println("    public " + typeName + " save(" + typeName + " object) {");
             pw.println("        return service.save(object);");
             pw.println("    }");
             pw.println("    ");
 
             //pw.println("    @Override");
-            pw.println("    public MyEntity update(" + typeName + " object) {");
+            pw.println("    public " + typeName + " update(" + typeName + " object) {");
             pw.println("        return service.update(object);");
             pw.println("    }");
             pw.println("    ");
@@ -101,27 +101,30 @@ public class ExtendsProcessor extends AbstractProcessor {
             pw.println("    }");
             pw.println("    ");
 
-            //pw.println("    @Override");
-            pw.println("    public List findWithNamedQuery(String queryName) {");
-            pw.println("        return service.findWithNamedQuery(queryName);");
+            sourceClass.getEnclosedElements().forEach(attr -> {
+                if (attr.getKind().isField()) {
+                    if (attr.getAnnotationsByType(Attr.class).length > 0) {
+                        pw.println("    public QueryBuilder<" + typeName + "> findBy" + firstUpperCaseLetter(attr.toString()) + "(" + attr.asType() + " " + attr + ") {");
+                        pw.println("        return find(\"" + attr.toString() + "\", " + attr.toString() + ");");
+                        pw.println("    }");
+                        pw.println("    ");
+                    }
+                }
+            });
+
+            pw.println("    public QueryBuilder<" + typeName + "> findWithNamedQuery(String namedQueryName) {");
+            pw.println("        return service.findWithNamedQuery(namedQueryName);");
             pw.println("    }");
             pw.println("    ");
 
-            //pw.println("    @Override");
-            pw.println("    public List findWithNamedQuery(String queryName, int limit) {");
-            pw.println("        return service.findWithNamedQuery(queryName, limit);");
+            pw.println("    public QueryBuilder<" + typeName + "> findWithQuery(String query) {");
+            pw.println("        return service.findWithQuery(query);");
             pw.println("    }");
             pw.println("    ");
 
-            //pw.println("    @Override");
-            pw.println("    public List findWithNamedQuery(String queryName, Map parameters) {");
-            pw.println("        return service.findWithNamedQuery(queryName, parameters, 0);");
-            pw.println("    }");
-            pw.println("    ");
-
-            //pw.println("    @Override");
-            pw.println("    public List findWithNamedQuery(String namedQueryName, Map parameters, int resultLimit) {");
-            pw.println("        return service.findWithNamedQuery(namedQueryName, parameters, resultLimit);");
+            pw.println("    private QueryBuilder<" + typeName + "> find(String name, Object value) {");
+            pw.println("        return service.findWithQuery(\"SELECT o FROM " + typeName + " o where o.\" + name + \" = :\" + name + \"\")");
+            pw.println("                      .where(name, value);");
             pw.println("    }");
             pw.println("    ");
 
@@ -142,22 +145,4 @@ public class ExtendsProcessor extends AbstractProcessor {
     private String firstUpperCaseLetter(String s) {
         return s.substring(0, 1).toUpperCase() + s.substring(1);
     }
-
-    /*private void attributsProcess(Element extendsClass) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "getAttributs");
-
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "enclosedElements: ");
-        extendsClass.getEnclosedElements().forEach(el -> {
-            if (el.getKind().isField()) {
-                if (el.getAnnotationsByType(Attr.class).length > 0) {
-
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field: " + el.toString());
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field1: " + el.getClass().getName());
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field2: " + el.getClass().getCanonicalName());
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field3: " + el.asType());
-                    processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, "    field4: " + el.asType());
-                }
-            }
-        });
-    }*/
 }

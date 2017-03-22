@@ -13,6 +13,15 @@ import java.lang.annotation.Target;
  * www.yseemonnier.com
  * https://github.com/YMonnier
  */
+
+/**
+ * Extends annotation can be apply on a Class.
+ * This Annotation allows to create the
+ * CRUD operations for the specific Class.
+ * @see Attr
+ * @see com.ymonnier.sql.help.service.CrudService
+ * @see com.ymonnier.sql.help.service.CrudServiceBean
+ */
 @Target(value = ElementType.TYPE)
 @Retention(value = RetentionPolicy.SOURCE)
 public @interface Extends {

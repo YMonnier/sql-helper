@@ -73,6 +73,10 @@ public class EntityManagerFactory {
         }
     }
 
+    /**
+     * Get an entity manager connection.
+     * @return a connection.
+     */
     public static synchronized EntityManager get() {
         EntityManager entityManager = null;
 
@@ -84,6 +88,10 @@ public class EntityManagerFactory {
         return entityManager;
     }
 
+    /**
+     * Release connection
+     * @param entityManager specific connection.
+     */
     public static synchronized void release(EntityManager entityManager) {
         if (entityManagers.size() < numberOfInitialConnections) {
             entityManagers.add(managerFactory.createEntityManager());

@@ -12,19 +12,47 @@ import java.util.Map;
  * https://github.com/YMonnier
  */
 public interface CrudService<T> {
+    /**
+     * Save an entity into the database.
+     *
+     * @param object Entity object.
+     * @return The entity updated(@ID).
+     */
     public T save(T object);
 
+    /**
+     * Update an entity into the database.
+     *
+     * @param object Entity object.
+     * @return The entity updated.
+     */
     public T update(T object);
 
+    /**
+     * Delete an entity into the database.
+     *
+     * @param object Entity object.
+     */
     public void delete(T object);
 
-    public List<T> findWithNamedQuery(String queryName);
+    /**
+     * Create a QueryBuilder for a named query.
+     *
+     * @param namedQueryName The string query name.
+     * @return QueryBuilder object. @see QueryBuilder
+     */
+    public QueryBuilder<T> findWithNamedQuery(String namedQueryName);
 
-    public List<T> findWithNamedQuery(String queryName, int limit);
+    /**
+     * Create a QueryBuilder for a specific query.
+     *
+     * @param query The string query (native SQL or JPQL).
+     * @return QueryBuilder object. @see QueryBuilder
+     */
+    public QueryBuilder<T> findWithQuery(String query);
 
-    public List<T> findWithNamedQuery(String queryName, Map parameters);
-
-    public List<T> findWithNamedQuery(String queryName, Map parameters, int resultLimit);
-
+    /**
+     * Close the EntityManager connection.
+     */
     public void close();
 }

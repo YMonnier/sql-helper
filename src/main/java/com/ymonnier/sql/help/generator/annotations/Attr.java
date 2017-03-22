@@ -10,6 +10,14 @@ import java.lang.annotation.Target;
  * www.yseemonnier.com
  * https://github.com/YMonnier
  */
+
+/**
+ * Attr annotation can be apply on a Field Element.
+ * This Annotation allows to create the 'findByATTR' method.
+ * @see Extends
+ * @see com.ymonnier.sql.help.service.CrudService
+ * @see com.ymonnier.sql.help.service.CrudServiceBean
+ */
 @Target(value = ElementType.FIELD)
 @Retention(value = RetentionPolicy.SOURCE)
 public @interface Attr {
