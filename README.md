@@ -8,115 +8,190 @@ CRUD + findById methods generator depending on attributes.
 
 ```java
 
+  /**
+  * Extends annotation can be apply on a Class.
+  * This Annotation allows to create the
+  * CRUD operations for the specific Class.
+  * @see Attr
+  * @see com.ymonnier.sql.help.service.CrudService
+  * @see com.ymonnier.sql.help.service.CrudServiceBean
+  */
   @Target(value = ElementType.TYPE)
   @Retention(value = RetentionPolicy.SOURCE)
-  public @interface Extends {}
-  
+  public @interface Extends { }
+
+
+  /**
+   * Attr annotation can be apply on a Field Element.
+   * This Annotation allows to create the 'findByATTR' method.
+   * @see Extends
+   * @see com.ymonnier.sql.help.service.CrudService
+   * @see com.ymonnier.sql.help.service.CrudServiceBean
+   */
   @Target(value = ElementType.FIELD)
   @Retention(value = RetentionPolicy.SOURCE)
-  public @interface Attr {}
+  public @interface Attr { }
 ```
 
-## How to use it
+```java
+   public interface CrudService<T> {
+       /**
+        * Save an entity into the database.
+        *
+        * @param object Entity object.
+        * @return The entity updated(@ID).
+        */
+       public T save(T object);
+
+       /**
+        * Update an entity into the database.
+        *
+        * @param object Entity object.
+        * @return The entity updated.
+        */
+       public T update(T object);
+
+       /**
+        * Delete an entity into the database.
+        *
+        * @param object Entity object.
+        */
+       public void delete(T object);
+
+       /**
+        * Create a QueryBuilder for a named query.
+        *
+        * @param namedQueryName The string query name.
+        * @return QueryBuilder object. @see QueryBuilder
+        */
+       public QueryBuilder<T> findWithNamedQuery(String namedQueryName);
+
+       /**
+        * Create a QueryBuilder for a specific query.
+        *
+        * @param query The string query (native SQL or JPQL).
+        * @return QueryBuilder object. @see QueryBuilder
+        */
+       public QueryBuilder<T> findWithQuery(String query);
+
+       /**
+        * Close the EntityManager connection.
+        */
+       public void close();
+   }
+```
+
+## Usage
+
+#### Your entity
+
+```java
+   @Entity
+   @Extends
+   @NamedQuery(name = "Person.all",
+         query = "SELECT p from Person p")
+   public class Person {
+     @Attr
+     @Id
+     @GeneratedValue(strategy = GenerationType.IDENTITY)
+     private Long id;
+
+     @Attr
+     private String name;
+
+     @Attr
+     private String address;
+
+     private String test;
+
+     // getters, setters, builder, ...
+   }
+```
+
+#### Will generate
+
+```java
+public class _Person {
+
+  public _Person() {
+      service = new CrudServiceBean<Person>();
+  }
+
+  public _Person(EntityManager em) {
+      service = new CrudServiceBean<Person>(em);
+  }
+
+  public EntityManager getEntityManager() {
+      return service.entityManager;
+  }
+
+  public Person save(Person object) {
+      return service.save(object);
+  }
+
+  public Person update(Person object) {
+      return service.update(object);
+  }
+
+  public void delete(Person object) {
+      service.delete(object);
+  }
+
+  public QueryBuilder<Person> findById(java.lang.Long id) {
+      return find("id", id);
+  }
+
+  public QueryBuilder<Person> findByName(java.lang.String name) {
+      return find("name", name);
+  }
+
+  // ...
+
+  public QueryBuilder<Person> findWithNamedQuery(String namedQueryName) {
+      return service.findWithNamedQuery(namedQueryName);
+  }
+
+  public QueryBuilder<Person> findWithQuery(String query) {
+      return service.findWithQuery(query);
+  }
+}
+```
+
+
+#### Main
 
 Before to use ORM operations, initialize the `EntityManagerFactory`:
 
 * `EntityManagerFactory.init("persistence-unit name");` (from your `persistence.xml`)
 
-### Your entity
-
-```java
-  @Entity
-  @Extends
-  public class MyEntity {
-      @Attr
-      @Id
-      @GeneratedValue
-      Long id; // generate findById method
-
-      @Attr
-      String name; // generate findByName method
-
-      @Attr
-      String address; // generate findByAddress method
-  }
-```
-
-Will generate: 
-
-```java
-  public class _MyEntity {
-
-      private final CrudServiceBean<MyEntity> service = new CrudServiceBean<MyEntity>();
-
-      public MyEntity findById(java.lang.Long id) {
-          return null;
-      }
-
-      public MyEntity findByName(java.lang.String name) {
-          return null;
-      }
-
-      public MyEntity findByAddress(java.lang.String address) {
-          return null;
-      }
-
-      public EntityManager getEntityManager() {
-          return service.entityManager;
-      }
-
-      public MyEntity save(MyEntity object) {
-          return service.save(object);
-      }
-
-      public MyEntity update(MyEntity object) {
-          return service.update(object);
-      }
-
-      public void delete(MyEntity object) {
-          service.delete(object);
-      }
-
-      public List findWithNamedQuery(String queryName) {
-          return service.findWithNamedQuery(queryName);
-      }
-
-      public List findWithNamedQuery(String queryName, int limit) {
-          return service.findWithNamedQuery(queryName, limit);
-      }
-
-      public List findWithNamedQuery(String queryName, Map parameters) {
-          return service.findWithNamedQuery(queryName, parameters, 0);
-      }
-
-      public List findWithNamedQuery(String namedQueryName, Map parameters, int resultLimit) {
-          return service.findWithNamedQuery(namedQueryName, parameters, resultLimit);
-      }
-
-      public void close() {
-          service.close();
-      }   
-  }
-```
-
-Main.java
-
 ```java
   public class App {
     public static void main(String[] args) {
-        EntityManagerFactory.init("testpostgresqllocal");
+        EntityManagerFactory.init("TestPersistence");
 
+        _Person service = new _Person();
 
-        _MyEntity service = new _MyEntity();
-        
-        MyEntity entity = new MyEntity();
-        entity.name = "John";
-        entity.address = "10 street...";
+        Person person = new new Person.Builder()
+                .setName("John")
+                .setAddress("10 Peace Street.")
+                .setTest("My super test")
+                .build();
 
+        // Save object
         EntityTransaction transac = service.getEntityManager().getTransaction();
         transac.begin();
-        service.save(entity);
+        person = service.save(entity);
         transac.commit();
+
+        // Get all
+        List<Person> persons = service
+                .findWithNamedQuery("Person.all")
+                .list()
+
+        // Get specific person
+        Person p = service
+                .findById(2)
+                .first();
     }
 }
 ```
