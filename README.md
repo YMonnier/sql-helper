@@ -9,7 +9,7 @@ CRUD + findById methods generator depending on attributes.
 ```java
 
   /**
-  * Extends annotation can be apply on a Class.
+  * Extends annotation can be applied on a Class.
   * This Annotation allows to create the
   * CRUD operations for the specific Class.
   * @see Attr
@@ -22,7 +22,7 @@ CRUD + findById methods generator depending on attributes.
 
 
   /**
-   * Attr annotation can be apply on a Field Element.
+   * Attr annotation can be applied on a Field Element.
    * This Annotation allows to create the 'findByATTR' method.
    * @see Extends
    * @see com.ymonnier.sql.help.service.CrudService
@@ -83,6 +83,14 @@ CRUD + findById methods generator depending on attributes.
 
 ## Usage
 
+Maven dependency:
+```maven
+  <dependency>
+      <groupId>com.github.ymonnier.sql-helper</groupId>
+      <artifactId>ym-sql-helper</artifactId>
+      <version>LATEST</version>
+  </dependency>
+```
 #### Your entity
 
 ```java
